@@ -1,0 +1,9 @@
+{
+    "name": "Biere du monde",
+    "url": "http://www.saveur-biere.com/annuaire-biere",
+    "foreach": "div.containerbody.clubbody > div:nth-child(2).leftgraybox.htc > ul:nth-child(2).redarrowlinks > li > a:nth-child(1)",
+    "context": "country",
+    "description": {
+	    "name": "div > div > ul.redarrowlinks > li > a"
+	}
+}
