@@ -6,7 +6,10 @@ It aims to parse HTML document in a declarative way using css selectors. Its
 main purpose is to parse table-like data and paginated data.
 
 ## Example :
-Getting all comments from a article from "LeFigaro.fr"
+
+Getting all comments from
+[an article](http://www.lefigaro.fr/politique/le-scan/2016/07/21/25001-20160721ARTFIG00062-attentat-de-nice-la-droite-demande-une-enquete-independante.php)
+at "LeFigaro.fr"
 
 ```
 from apifier import Apifier
