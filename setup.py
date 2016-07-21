@@ -3,7 +3,7 @@ setup(
     name = 'apifier',
     packages = ['apifier'],
     version = '0.1',
-    description = 'A web parser for paginated table data',
+    description = 'A web parser for tabular and/or paginated data',
     author = 'luxcem',
     author_email = 'a@luxcem.fr',
     url = 'https://github.com/luxcem/apifier',
