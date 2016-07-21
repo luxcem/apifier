@@ -3,10 +3,8 @@ import json
 
 from lxml import etree
 from cssselect import GenericTranslator
-# from collections import namedtuple, OrderedDict
 
 class Apifier:
-
     def __init__(self,
                  config=None,
                  description_file=None):
