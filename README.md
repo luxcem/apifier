@@ -5,7 +5,13 @@ Apifier is a very simple HTML parser written in Python.
 It aims to parse HTML document in a declarative way using css selectors. Its
 main purpose is to parse tabular and/or paginated data.
 
-## Example :
+## Install
+
+```
+pip install apifier
+```
+
+## Example
 
 Getting all comments from
 [an article](http://www.lefigaro.fr/politique/le-scan/2016/07/21/25001-20160721ARTFIG00062-attentat-de-nice-la-droite-demande-une-enquete-independante.php)
