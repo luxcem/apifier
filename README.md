@@ -7,7 +7,7 @@ main purpose is to parse tabular and/or paginated data.
 
 ## Install
 
-Apifier is available for python >= 3.2
+Apifier is available for python 3
 
 [![Build Status](https://travis-ci.org/luxcem/apifier.svg?branch=master)](https://travis-ci.org/luxcem/apifier)
 
