@@ -1,34 +1,63 @@
-import requests
 import json
+from copy import deepcopy
 
+import requests
 from lxml import etree
 from cssselect import GenericTranslator
 
-class Apifier:
-    def __init__(self,
-                 config=None,
-                 description_file=None):
 
-        if description_file:
-            with open(description_file) as fo:
+class Apifier:
+
+    _config_error = ValueError('Incorrect configuration, check the docs')
+    _config_allowed_keys = ('name', 'url', 'foreach', 'encoding',
+                            'description', 'context', 'prefix')
+
+    def __init__(self, config):
+        # Avoid side effect on config
+        config = deepcopy(config)
+
+        if isinstance(config, str):
+            with open(config) as fo:
                 config = json.load(fo)
-        self.name = config["name"]
-        self.url = config["url"]
-        self.foreach = config.get("foreach", None)
-        self.encoding = config.get("encoding", None)
-        self.description = config["description"]
-        self.context = config.get("context", None)
+
+        self._check_config(config)
+
+        self.name = config.get('name', None)
+        self.url = config['url']
+        self.foreach = config.get('foreach', None)
+        self.encoding = config.get('encoding', None)
+        self.description = config['description']
+        self.context = config.get('context', None)
+
+    def _check_config(self, config):
+        if not isinstance(config, dict):
+            raise self._config_error
+
+        if not 'url' in config or not 'description' in config:
+            raise self._config_error
+
+        for key in config:
+            if not key in self._config_allowed_keys:
+                raise self._config_error
+
+        if 'prefix' in config:
+            # Prefix all selectors with the prefix
+            for key in config['description']:
+                config['description'][key] = config[
+                    'prefix'] + config['description'][key]
 
     @property
     def items(self):
         return self.description.items()
 
     @classmethod
-    def consolidate(cls, description_list):
+    def consolidate(cls, config_list):
         # Concat results from all Apifier
-        return [sublist for description_file in description_list for sublist in Apifier(description_file).load()]
+        return [sublist for config
+                in config_list for sublist
+                in Apifier(config).load()]
 
-    def load_foreach(self):
+    def _load_foreach(self):
         # Scrap data over multiple pages
         page = requests.get(self.url)
         tree = etree.HTML(page.text)
@@ -37,16 +66,26 @@ class Apifier:
         l = [e for e in tree.xpath(selector)]
 
         # Concat results from all pages
-        return [sublist for e in l for sublist in self.load_data(e.get("href"), e.text)]
+        return [sublist for e
+                in l for sublist
+                in self._load_data(e.get('href'), e.text)]
 
-    def load_data(self, url, context=None):
+    def _get_text_content(self, node):
+        # Iter over text inside the node
+        # Element.itertext() removes tags
+        text = ''.join(node.itertext())
+        if self.encoding:
+            text = text.encode(self.encoding).decode('utf-8')
+        return text.strip()
+
+    def _load_data(self, url, context=None):
         page = requests.get(url)
         tree = etree.HTML(page.text)
-
-        if self.encoding:
-            l = {key: [e.text.encode(self.encoding).decode("utf-8") for e in tree.xpath(GenericTranslator().css_to_xpath(selector))] for key, selector in self.items}
-        else:
-            l = {key: [e.text for e in tree.xpath(GenericTranslator().css_to_xpath(selector))] for key, selector in self.items}
+        # Transform the css selector to xpath
+        l = {key: [self._get_text_content(e) for e
+                   in tree.xpath(
+                       GenericTranslator().css_to_xpath(selector)
+        )] for key, selector in self.items}
 
         if context:
             # Add a context attribute to the record
@@ -59,6 +98,6 @@ class Apifier:
 
     def load(self):
         if self.foreach:
-            return self.load_foreach()
+            return self._load_foreach()
         else:
-            return self.load_data(self.url)
+            return self._load_data(self.url)
