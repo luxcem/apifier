@@ -30,9 +30,10 @@ config = {
     "url": "http://www.lefigaro.fr/politique/le-scan/2016/07/21/25001-20160721ARTFIG00062-attentat-de-nice-la-droite-demande-une-enquete-independante.php",
     "foreach": "#fig-pagination-nav > li > a",
     "context": "page",
+    "prefix": ""#reagir > div > div > div.fig-col.fig-col--comments > div:nth-child(3) > ul > li > article >",
     "description": {
-        "author": "#reagir > div > div > div.fig-col.fig-col--comments > div:nth-child(3) > ul > li > article > div.fig-comment-header a",
-        "comment": "#reagir > div > div > div.fig-col.fig-col--comments > div:nth-child(3) > ul > li > article > div.fig-comment-msg p"
+        "author": "div.fig-comment-header a",
+        "comment": "div.fig-comment-msg p"
     }
 }
 
@@ -56,6 +57,7 @@ data = api.load()
 + context : each data will be associated with a special variable named after the content of the pagination link
   in this case, this content is just the page number, but the pagination mechanism can be used for othher purpose
   like categories
++ prefix : descriptors will be prefixed by this option
 + description : descriptor for content to parse, in this example, comment content and author name.
 
 The result looks like this :

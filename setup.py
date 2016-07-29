@@ -27,6 +27,7 @@ setup(
         'lxml'
     ],
     tests_require=[
-        'httmock'
+        'httmock',
+        'pytest'
     ]
 )
