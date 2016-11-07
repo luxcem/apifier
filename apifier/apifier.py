@@ -10,7 +10,8 @@ class Apifier:
 
     _config_error = ValueError('Incorrect configuration, check the docs')
     _config_allowed_keys = ('name', 'url', 'foreach', 'encoding',
-                            'description', 'context', 'prefix', 'raw_selectors')
+                            'description', 'context', 'prefix',
+                            'raw_selectors')
 
     def __init__(self, config):
         # Avoid side effect on config
@@ -35,11 +36,11 @@ class Apifier:
         if not isinstance(config, dict):
             raise self._config_error
 
-        if not 'url' in config or not 'description' in config:
+        if 'url' not in config or 'description' not in config:
             raise self._config_error
 
         for key in config:
-            if not key in self._config_allowed_keys:
+            if key not in self._config_allowed_keys:
                 raise self._config_error
 
     @property
@@ -81,13 +82,18 @@ class Apifier:
         # Transform the css selector to xpath if asked
         for key, selector in self.items:
             if key in self.raw_selectors:
-                selector = GenericTranslator().css_to_xpath(self.prefix) + selector
+                selector = '{}{}'.format(
+                    GenericTranslator().css_to_xpath(self.prefix),
+                    selector
+                )
                 l[key] = [e for e in tree.xpath(selector)]
             else:
                 l[key] = [self._get_text_content(e) for e
                           in tree.xpath(
-                        GenericTranslator().css_to_xpath(self.prefix + selector)
-                    )]
+                              GenericTranslator().css_to_xpath(
+                                  self.prefix + selector
+                              )
+                          )]
 
         if context:
             # Add a context attribute to the record
