@@ -10,7 +10,7 @@ class Apifier:
 
     _config_error = ValueError('Incorrect configuration, check the docs')
     _config_allowed_keys = ('name', 'url', 'foreach', 'encoding',
-                            'description', 'context', 'prefix')
+                            'description', 'context', 'prefix', 'raw_selectors')
 
     def __init__(self, config):
         # Avoid side effect on config
@@ -24,10 +24,12 @@ class Apifier:
 
         self.name = config.get('name', None)
         self.url = config['url']
+        self.prefix = config['prefix']
         self.foreach = config.get('foreach', None)
         self.encoding = config.get('encoding', None)
         self.description = config['description']
         self.context = config.get('context', None)
+        self.raw_selectors = config.get('raw_selectors', [])
 
     def _check_config(self, config):
         if not isinstance(config, dict):
@@ -39,12 +41,6 @@ class Apifier:
         for key in config:
             if not key in self._config_allowed_keys:
                 raise self._config_error
-
-        if 'prefix' in config:
-            # Prefix all selectors with the prefix
-            for key in config['description']:
-                config['description'][key] = config[
-                    'prefix'] + config['description'][key]
 
     @property
     def items(self):
@@ -81,11 +77,17 @@ class Apifier:
     def _load_data(self, url, context=None):
         page = requests.get(url)
         tree = etree.HTML(page.text)
-        # Transform the css selector to xpath
-        l = {key: [self._get_text_content(e) for e
-                   in tree.xpath(
-                       GenericTranslator().css_to_xpath(selector)
-        )] for key, selector in self.items}
+        l = {}
+        # Transform the css selector to xpath if asked
+        for key, selector in self.items:
+            if key in self.raw_selectors:
+                selector = GenericTranslator().css_to_xpath(self.prefix) + selector
+                l[key] = [e for e in tree.xpath(selector)]
+            else:
+                l[key] = [self._get_text_content(e) for e
+                          in tree.xpath(
+                        GenericTranslator().css_to_xpath(self.prefix + selector)
+                    )]
 
         if context:
             # Add a context attribute to the record

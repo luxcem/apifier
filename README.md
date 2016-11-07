@@ -30,6 +30,7 @@ config = {
     "url": "http://www.lefigaro.fr/politique/le-scan/2016/07/21/25001-20160721ARTFIG00062-attentat-de-nice-la-droite-demande-une-enquete-independante.php",
     "foreach": "#fig-pagination-nav > li > a",
     "context": "page",
+    "raw_selectors": [],
     "prefix": ""#reagir > div > div > div.fig-col.fig-col--comments > div:nth-child(3) > ul > li > article >",
     "description": {
         "author": "div.fig-comment-header a",
@@ -57,6 +58,7 @@ data = api.load()
 + context : each data will be associated with a special variable named after the content of the pagination link
   in this case, this content is just the page number, but the pagination mechanism can be used for othher purpose
   like categories
++ raw_selectors : list of fields in description which are raw xpath selectors instead of css selectors (for example if you want to get element attributes)  
 + prefix : descriptors will be prefixed by this option
 + description : descriptor for content to parse, in this example, comment content and author name.
 
