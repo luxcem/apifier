@@ -43,6 +43,15 @@ class Apifier:
             if key not in self._config_allowed_keys:
                 raise self._config_error
 
+        for key, value in config['description'].items():
+            if key not in config.get('raw_selectors', []):
+                try:
+                    GenericTranslator().css_to_xpath(value)
+                except:
+                    raise ValueError(
+                        "Description config's field '{}' seems to be raw xpath but does not appear in raw_selectors config's array".format(
+                            key))        
+
     @property
     def items(self):
         return self.description.items()
