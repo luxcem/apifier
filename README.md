@@ -10,6 +10,7 @@ main purpose is to parse tabular and/or paginated data.
 Apifier is available for python 3
 
 [![Build Status](https://travis-ci.org/luxcem/apifier.svg?branch=master)](https://travis-ci.org/luxcem/apifier)
+[![codecov](https://codecov.io/gh/luxcem/vizhash/branch/master/graph/badge.svg)](https://codecov.io/gh/luxcem/vizhash)
 
 ```
 pip install apifier
