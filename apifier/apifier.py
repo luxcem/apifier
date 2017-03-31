@@ -49,8 +49,9 @@ class Apifier:
                     GenericTranslator().css_to_xpath(value)
                 except:
                     raise ValueError(
-                        "Description config's field '{}' seems to be raw xpath but does not appear in raw_selectors config's array".format(
-                            key))        
+                        "Description config's field '{}' seems to be raw"
+                        "xpath but does not appear in raw_selectors "
+                        "config's array".format(key))
 
     @property
     def items(self):
