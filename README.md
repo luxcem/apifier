@@ -32,7 +32,8 @@ config = {
     "url": "http://www.lefigaro.fr/politique/le-scan/2016/07/21/25001-20160721ARTFIG00062-attentat-de-nice-la-droite-demande-une-enquete-independante.php",
     "foreach": "#fig-pagination-nav > li > a",
     "context": "page",
-    "prefix": ""#reagir > div > div > div.fig-col.fig-col--comments > div:nth-child(3) > ul > li > article >",
+    "xpath": False,
+    "prefix": "#reagir > div > div > div.fig-col.fig-col--comments > div:nth-child(3) > ul > li > article >",
     "description": {
         "author": "div.fig-comment-header a",
         "comment": "div.fig-comment-msg p"
@@ -46,9 +47,12 @@ data = api.load()
 ## Config
 
 + name : name of the current configuration
-+ encoding : is the encoding the page is using, data will be converted from this encoding to utf-8 for sanity
++ encoding : is the encoding the page is using, data will be converted
+  from this encoding to utf-8 for sanity
 + url : page url, first page in case of paginated data
-+ foreach : css selector for the pagination links int this example pagination looks like :
++ xpath: boolean, set to true if selectors are xpath instead of css
++ foreach : css selector for the pagination links int this example
+  pagination looks like :
   ```
   <ul id="fig-pagination-nav">
     <li class="fig-pagination-current"><a href="…"> 1 </a></li>
@@ -56,11 +60,15 @@ data = api.load()
     <li><a href="…"> 3 </a></li>
   </ul>
   ```
-+ context : each data will be associated with a special variable named after the content of the pagination link
-  in this case, this content is just the page number, but the pagination mechanism can be used for othher purpose
-  like categories
++ context : each data will be associated with a special variable named
+  after the content of the pagination link in this case, this content
+  is just the page number, but the pagination mechanism can be used
+  for othher purpose like categories
 + prefix : descriptors will be prefixed by this option
-+ description : descriptor for content to parse, in this example, comment content and author name.
++ description : descriptor for content to parse, in this example,
+  comment content and author name.
+
+To use xpath selector instead of css write them prefixed by a $.
 
 The result is :
 

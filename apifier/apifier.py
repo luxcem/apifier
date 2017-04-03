@@ -10,8 +10,7 @@ class Apifier:
 
     _config_error = ValueError('Incorrect configuration, check the docs')
     _config_allowed_keys = ('name', 'url', 'foreach', 'encoding',
-                            'description', 'context', 'prefix',
-                            'raw_selectors')
+                            'description', 'context', 'prefix', 'xpath')
 
     def __init__(self, config):
         # Avoid side effect on config
@@ -25,12 +24,21 @@ class Apifier:
 
         self.name = config.get('name', None)
         self.url = config['url']
-        self.prefix = config['prefix']
-        self.foreach = config.get('foreach', None)
+        self.xpath = config.get('xpath', False)
+        self.prefix = config.get('prefix', '')
+        self.foreach = self._get_selector(config.get('foreach', None))
         self.encoding = config.get('encoding', None)
         self.description = config['description']
         self.context = config.get('context', None)
-        self.raw_selectors = config.get('raw_selectors', [])
+
+    def _get_selector(self, selector):
+        if not selector:
+            return selector
+
+        if self.xpath:
+            return selector
+        else:
+            return GenericTranslator().css_to_xpath(selector)
 
     def _check_config(self, config):
         if not isinstance(config, dict):
@@ -39,19 +47,12 @@ class Apifier:
         if 'url' not in config or 'description' not in config:
             raise self._config_error
 
+        if not config['url'] or not config['description']:
+            raise self._config_error
+
         for key in config:
             if key not in self._config_allowed_keys:
                 raise self._config_error
-
-        for key, value in config['description'].items():
-            if key not in config.get('raw_selectors', []):
-                try:
-                    GenericTranslator().css_to_xpath(value)
-                except:
-                    raise ValueError(
-                        "Description config's field '{}' seems to be raw"
-                        "xpath but does not appear in raw_selectors "
-                        "config's array".format(key))
 
     @property
     def items(self):
@@ -59,18 +60,16 @@ class Apifier:
 
     @classmethod
     def consolidate(cls, config_list):
-        # Concat results from all Apifier
+        """Concat results from all Apifier"""
         return [sublist for config
                 in config_list for sublist
                 in Apifier(config).load()]
 
     def _load_foreach(self):
-        # Scrap data over multiple pages
+        """Scrap data over multiple pages"""
         page = requests.get(self.url)
         tree = etree.HTML(page.text)
-
-        selector = GenericTranslator().css_to_xpath(self.foreach)
-        l = [e for e in tree.xpath(selector)]
+        l = [e for e in tree.xpath(self.foreach)]
 
         # Concat results from all pages
         return [sublist for e
@@ -78,8 +77,8 @@ class Apifier:
                 in self._load_data(e.get('href'), e.text)]
 
     def _get_text_content(self, node):
-        # Iter over text inside the node
-        # Element.itertext() removes tags
+        """Iter over text inside the node
+        Element.itertext() removes tags"""
         text = ''.join(node.itertext())
         if self.encoding:
             text = text.encode(self.encoding).decode('utf-8')
@@ -91,19 +90,17 @@ class Apifier:
         l = {}
         # Transform the css selector to xpath if asked
         for key, selector in self.items:
-            if key in self.raw_selectors:
-                selector = '{}{}'.format(
-                    GenericTranslator().css_to_xpath(self.prefix),
-                    selector
-                )
-                l[key] = [e for e in tree.xpath(selector)]
-            else:
-                l[key] = [self._get_text_content(e) for e
-                          in tree.xpath(
-                              GenericTranslator().css_to_xpath(
-                                  self.prefix + selector
-                              )
-                          )]
+            selector = self._get_selector('{}{}'.format(
+                self.prefix,
+                selector
+            ))
+            l[key] = []
+            for e in tree.xpath(selector):
+                # If e is a lxml instance of element get e.text
+                if isinstance(e, etree._Element):
+                    l[key].append(self._get_text_content(e))
+                else:
+                    l[key].append(e)
 
         if context:
             # Add a context attribute to the record

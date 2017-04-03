@@ -1,0 +1,9 @@
+{
+    "name": "Test",
+    "url": "http://en.wikipedia.org/python",
+    "prefix": "#mw-content-text > table.wikitable.sortable > tbody > tr >",
+    "description": {
+        "version": "td:nth-child(1)",
+        "date": "td:nth-child(2) time"
+    }
+}

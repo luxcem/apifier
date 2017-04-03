@@ -1,5 +1,5 @@
 from distutils.core import setup
-__version__ = '1.1.1'
+__version__ = '2.0.0'
 
 setup(
     name='apifier',
@@ -28,6 +28,7 @@ setup(
     ],
     tests_require=[
         'httmock',
-        'pytest'
+        'pytest',
+        'pytest-cov'
     ]
 )

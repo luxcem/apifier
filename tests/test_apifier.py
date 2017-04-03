@@ -1,5 +1,7 @@
 import os
+import pytest
 
+from copy import deepcopy
 from httmock import urlmatch, HTTMock
 from apifier import Apifier
 
@@ -9,6 +11,7 @@ def mock_wikipedia(url, request):
     path = os.path.dirname(os.path.realpath(__file__)) + '/data/python.html'
     with open(path, 'r') as fo:
         return fo.read()
+
 
 _python_versions = [{'date': '13 avril 1999', 'version': '1.5(.2)'},
                     {'date': '5 septembre 2000', 'version': '1.6'},
@@ -38,6 +41,25 @@ _simple_config = {
     }
 }
 
+_simple_config_xpath = deepcopy(_simple_config)
+_simple_config_xpath['xpath'] = True
+_simple_config_xpath['prefix'] = '//*[@id="mw-content-text"]/table[3]/' \
+                                 'tbody/tr/'
+_simple_config_xpath['description']['version'] = 'td[1]'
+_simple_config_xpath['description']['date'] = 'td[2]/time'
+
+_simple_config_foreach = {
+    'name': 'Test',
+    'url': 'http://en.wikipedia.org/python',
+    'encoding': 'utf-8',
+    'xpath': True,
+    'context': 'year',
+    'foreach': '//*[@id="mw-content-text"]/table[3]/tbody/tr/td[2]/time/a[3]',
+    'description': {
+        'title': '//h1/text()',
+    }
+}
+
 
 def test_init():
     assert isinstance(Apifier(_simple_config), Apifier)
@@ -49,3 +71,59 @@ def test_simple():
         data = api.load()
         assert len(data) == 16
         assert data == _python_versions
+
+
+def test_config_json():
+    config_path = os.path.dirname(
+        os.path.realpath(__file__)) + '/data/conf.json'
+    with HTTMock(mock_wikipedia):
+        api = Apifier(config_path)
+        data = api.load()
+        assert len(data) == 16
+        assert data == _python_versions
+
+
+def test_xpath():
+    with HTTMock(mock_wikipedia):
+        api = Apifier(_simple_config_xpath)
+        data = api.load()
+        assert len(data) == 16
+        assert data == _python_versions
+
+
+def test_fail():
+    with pytest.raises(ValueError):
+        Apifier(None)
+    with pytest.raises(ValueError):
+        fail_conf = deepcopy(_simple_config)
+        fail_conf['url'] = None
+        Apifier(fail_conf)
+    with pytest.raises(ValueError):
+        fail_conf = deepcopy(_simple_config)
+        fail_conf['description'] = None
+        Apifier(fail_conf)
+    with pytest.raises(ValueError):
+        fail_conf = deepcopy(_simple_config)
+        del fail_conf['url']
+        Apifier(fail_conf)
+    with pytest.raises(ValueError):
+        fail_conf = deepcopy(_simple_config)
+        del fail_conf['description']
+        Apifier(fail_conf)
+    with pytest.raises(ValueError):
+        fail_conf = deepcopy(_simple_config)
+        fail_conf['wrong_key'] = True
+        Apifier(fail_conf)
+
+
+def test_foreach():
+    with HTTMock(mock_wikipedia):
+        api = Apifier(_simple_config_foreach)
+        data = api.load()
+        assert len(data) == 16
+        years = ['1999', '2000', '2000', '2001', '2001', '2003', '2004',
+                 '2006', '2008', '2010', '2008', '2009', '2011', '2012',
+                 '2014', '2015']
+        for i, elem in enumerate(data):
+            assert elem['year'] == years[i]
+            assert elem['title'] == 'Python (langage)'
