@@ -2,7 +2,7 @@
 
 Apifier is a very simple HTML parser written in Python.
 
-It aims to parse HTML document in a declarative way using css selectors. Its
+It aims to parse HTML documents in a declarative way using css or xpath selectors. Its
 main purpose is to parse tabular and/or paginated data.
 
 ## Install
@@ -51,7 +51,9 @@ data = api.load()
   from this encoding to utf-8 for sanity
 + url : page url, first page in case of paginated data
 + xpath: boolean, set to true if selectors are xpath instead of css
-+ foreach : css selector for the pagination links int this example
++ next : selector for a "next" link, apifier will crawl pages with next 
+  link until none is found
++ foreach : selector for the pagination links int this example
   pagination looks like :
   ```
   <ul id="fig-pagination-nav">
