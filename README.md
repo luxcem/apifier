@@ -11,7 +11,7 @@ Apifier is available for python 3
 
 [![Build Status](https://travis-ci.org/luxcem/apifier.svg?branch=master)](https://travis-ci.org/luxcem/apifier)
 [![codecov](https://codecov.io/gh/luxcem/apifier/branch/master/graph/badge.svg)](https://codecov.io/gh/luxcem/apifier)
-
+[![PyPI version](https://badge.fury.io/py/apifier.svg)](https://badge.fury.io/py/apifier)
 
 ```
 pip install apifier
